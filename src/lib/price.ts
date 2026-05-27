@@ -6,18 +6,30 @@ export interface TokenPrice {
   change24h: number;
 }
 
+export const DEFAULT_TOKEN_PRICE_MAP: Record<string, string> = {
+  "ETH": "ethereum",
+  "BTC": "bitcoin",
+  "BNB": "binancecoin",
+  "MATIC": "polygon",
+  "SOL": "solana",
+  "USDT": "tether",
+  "USDC": "usd-coin",
+  "DAI": "dai",
+  "WETH": "weth",
+  "UNI": "uniswap",
+  "LINK": "chainlink",
+  "ARB": "arbitrum",
+  "OP": "ethereum",
+  "CAKE": "pancakeswap",
+  "QUICK": "quickswap",
+};
+
 export async function getTokenPrices(symbols: string[]): Promise<Record<string, TokenPrice>> {
   try {
-    const ids = symbols.map(s => {
+    const uniqueSymbols = [...new Set(symbols)];
+    const ids = uniqueSymbols.map(s => {
       const mapping: Record<string, string> = {
-        "ETH": "ethereum",
-        "BTC": "bitcoin",
-        "BNB": "binancecoin",
-        "MATIC": "polygon",
-        "SOL": "solana",
-        "USDT": "tether",
-        "USDC": "usd-coin",
-        "DAI": "dai",
+        ...DEFAULT_TOKEN_PRICE_MAP,
       };
       return mapping[s] || s.toLowerCase();
     }).join(",");
@@ -29,10 +41,8 @@ export async function getTokenPrices(symbols: string[]): Promise<Record<string, 
 
     const prices: Record<string, TokenPrice> = {};
     
-    for (const symbol of symbols) {
-      const id = symbols.find(s => s === symbol.toLowerCase()) ? 
-        symbol.toLowerCase() : 
-        { ETH: "ethereum", BTC: "bitcoin", BNB: "binancecoin", MATIC: "polygon", SOL: "solana", USDT: "tether", USDC: "usd-coin", DAI: "dai" }[symbol] || symbol.toLowerCase();
+    for (const symbol of uniqueSymbols) {
+      const id = DEFAULT_TOKEN_PRICE_MAP[symbol] || symbol.toLowerCase();
       
       const data = (response.data as Record<string, { usd: number; usd_24h_change: number }>)[id];
       if (data) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { decryptWallet, WalletInfo, TOKENS } from "@/lib/wallet";
+import { useState, useEffect } from "react";
+import { decryptWallet, WalletInfo, TOKENS, ImportedToken } from "@/lib/wallet";
 import { getTokenPrices, TokenPrice } from "@/lib/price";
 
 export default function WalletPage() {
@@ -16,9 +16,18 @@ export default function WalletPage() {
   const [sendAddress, setSendAddress] = useState("");
   const [bankAccount, setBankAccount] = useState("");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [importedTokens, setImportedTokens] = useState<ImportedToken[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("importedTokens");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
+
+  const allTokens = [...TOKENS, ...importedTokens];
 
   const loadPrices = async () => {
-    const tokenSymbols = TOKENS.map(t => t.symbol);
+    const tokenSymbols = allTokens.map(t => t.symbol);
     const tokenPrices = await getTokenPrices(tokenSymbols);
     setPrices(tokenPrices);
   };
@@ -109,15 +118,18 @@ export default function WalletPage() {
 
         {activeTab === "assets" && (
           <div className="space-y-3">
-            {TOKENS.map((token) => {
+            {allTokens.map((token) => {
               const price = prices[token.symbol];
               return (
-                <div key={token.symbol} className="flex justify-between items-center bg-neutral-800 p-3 rounded-lg">
+                <div key={token.symbol + (token.address || "")} className="flex justify-between items-center bg-neutral-800 p-3 rounded-lg">
                   <div className="flex items-center">
-                    <span className="text-2xl mr-3">{token.logo}</span>
+                    <span className="text-2xl mr-3">{token.logo || "🪙"}</span>
                     <div>
                       <p className="font-semibold">{token.symbol}</p>
                       <p className="text-xs text-neutral-400">{token.name}</p>
+                      {'isImported' in token && (token as ImportedToken).isImported && (
+                        <p className="text-xs text-blue-400">(Imported)</p>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
@@ -138,14 +150,14 @@ export default function WalletPage() {
           <div className="space-y-4">
             <select className="w-full p-3 bg-neutral-800 rounded-lg">
               <option>From: ETH</option>
-              {TOKENS.map((t) => (
-                <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+              {allTokens.map((t) => (
+                <option key={t.symbol + (t.address || "")} value={t.symbol}>{t.symbol}</option>
               ))}
             </select>
             <select className="w-full p-3 bg-neutral-800 rounded-lg">
               <option>To: USDT</option>
-              {TOKENS.map((t) => (
-                <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+              {allTokens.map((t) => (
+                <option key={t.symbol + (t.address || "")} value={t.symbol}>{t.symbol}</option>
               ))}
             </select>
             <input
@@ -165,8 +177,8 @@ export default function WalletPage() {
           <div className="space-y-4">
             <select className="w-full p-3 bg-neutral-800 rounded-lg">
               <option>ETH</option>
-              {TOKENS.map((t) => (
-                <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+              {allTokens.map((t) => (
+                <option key={t.symbol + (t.address || "")} value={t.symbol}>{t.symbol}</option>
               ))}
             </select>
             <input

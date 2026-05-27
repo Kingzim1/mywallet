@@ -8,11 +8,22 @@ A complete multi-chain cryptocurrency wallet application with seed phrase genera
 
 ## Recently Completed
 
-- [x] Wallet utilities library (`src/lib/wallet.ts`)
-  - 12-word seed phrase generation using BIP39
-  - Private key/seed phrase import functionality
-  - AES encryption for wallet security
-  - Multi-chain support (Ethereum, BSC, Polygon, Arbitrum, Optimism)
+- [x] Enhanced token support on every network (`src/lib/wallet.ts`)
+  - Added popular contract tokens for each supported chain
+  - Added `importToken()` function with contract key validation
+  - Added `ImportedToken` interface and `TokenType` union type
+
+- [x] Updated price mapping (`src/lib/price.ts`)
+  - Extended `DEFAULT_TOKEN_PRICE_MAP` for all new tokens
+
+- [x] Import token feature (`src/app/import-wallet/page.tsx`)
+  - Added "Token" tab alongside Seed Phrase and Private Key
+  - Form for importing custom tokens with contract addresses
+  - Validation for contract addresses and chain support
+
+- [x] Wallet assets integration (`src/app/wallet/page.tsx`)
+  - Display imported tokens in assets tab
+  - Mark imported tokens with "(Imported)" label
 
 - [x] Price API service (`src/lib/price.ts`)
   - Live token prices from CoinGecko
@@ -35,11 +46,14 @@ A complete multi-chain cryptocurrency wallet application with seed phrase genera
   - Receive tab with QR code display
 
 - [x] Dependencies installed
-  - ethers (Ethereum wallet functionality)
-  - bip39 (seed phrase generation/validation)
-  - crypto-js (wallet encryption)
-  - axios (API calls)
-  - @heroicons/react (UI icons)
+   - ethers (Ethereum wallet functionality)
+   - bip39 (seed phrase generation/validation)
+   - crypto-js (wallet encryption)
+   - axios (API calls)
+   - @heroicons/react (UI icons)
+
+- [x] Session History
+   - 2026-05-27: Added import tokens with contract keys feature on every network
 
 ## Current Structure
 
@@ -57,12 +71,13 @@ A complete multi-chain cryptocurrency wallet application with seed phrase genera
 
 **Supported Chains**: Ethereum, BSC, Polygon, Arbitrum, Optimism, Bitcoin, Solana
 
-**Supported Tokens**: ETH, BNB, MATIC, BTC, USDT, USDC, DAI, SOL
+**Supported Tokens**: ETH, WETH, USDT, USDC, DAI, UNI, LINK (Ethereum) | BNB, WBNB, BUSD, CAKE (BSC) | MATIC, WMATIC, QUICK (Polygon) | ARB, UNI (Arbitrum) | OP (Optimism) | Plus custom imported tokens
 
 **Core Features**:
 - Generate 12-word seed phrase
 - Create wallet with password encryption
 - Import wallet via seed phrase or private key
+- Import custom tokens with contract addresses
 - View asset balances with live prices
 - Swap between tokens
 - Send tokens to addresses
