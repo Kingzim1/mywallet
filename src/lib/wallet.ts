@@ -43,6 +43,9 @@ export const TOKENS: TokenInfo[] = [
   { symbol: "DAI", name: "Dai Stablecoin", address: "0x6B175474E89094C44Da98b954EddFd691dD3CA8", decimals: 18, chain: "ethereum", logo: "🟡" },
   { symbol: "UNI", name: "Uniswap", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC42C9Fdf4", decimals: 18, chain: "ethereum", logo: "🦄" },
   { symbol: "LINK", name: "Chainlink", address: "0x514910771AF9Ca656E2d21a0324e08F56dF5d58", decimals: 18, chain: "ethereum", logo: "🔗" },
+  { symbol: "SDZ", name: "SDZ Token", address: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", decimals: 18, chain: "ethereum", logo: "🎯" },
+  { symbol: "IOV", name: "IOV Token", address: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", decimals: 18, chain: "ethereum", logo: "🌐" },
+  { symbol: "GIFT", name: "Gift Token", address: "0xcccccccccccccccccccccccccccccccccccccccc", decimals: 18, chain: "ethereum", logo: "🎁" },
 
   // BSC tokens
   { symbol: "BNB", name: "BNB", address: "0x0000000000000000000000000000000000000000", decimals: 18, chain: "bsc", logo: "🟡" },

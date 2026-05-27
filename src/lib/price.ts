@@ -23,6 +23,9 @@ export const DEFAULT_TOKEN_PRICE_MAP: Record<string, string> = {
   "CAKE": "pancakeswap",
   "QUICK": "quickswap",
   "ZIM": "zim",
+  "SDZ": "sdz",
+  "IOV": "iov",
+  "GIFT": "gift",
 };
 
 export async function getTokenPrices(symbols: string[]): Promise<Record<string, TokenPrice>> {

@@ -71,7 +71,7 @@ A complete multi-chain cryptocurrency wallet application with seed phrase genera
 
 **Supported Chains**: Ethereum, BSC, Polygon, Arbitrum, Optimism, Bitcoin, Solana
 
-**Supported Tokens**: ETH, WETH, USDT, USDC, DAI, UNI, LINK (Ethereum) | BNB, WBNB, BUSD, CAKE (BSC) | MATIC, WMATIC, QUICK, ZIM (Polygon) | ARB, UNI (Arbitrum) | OP (Optimism) | Plus custom imported tokens
+**Supported Tokens**: ETH, WETH, USDT, USDC, DAI, UNI, LINK, SDZ, IOV, GIFT (Ethereum) | BNB, WBNB, BUSD, CAKE (BSC) | MATIC, WMATIC, QUICK, ZIM (Polygon) | ARB, UNI (Arbitrum) | OP (Optimism) | Plus custom imported tokens
 
 **Core Features**:
 - Generate 12-word seed phrase
