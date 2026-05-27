@@ -57,6 +57,7 @@ export const TOKENS: TokenInfo[] = [
   { symbol: "USDC", name: "USD Coin", address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", decimals: 6, chain: "polygon", logo: "🔵" },
   { symbol: "WETH", name: "Wrapped ETH", address: "0x7ceB25E1c3dcFC7Bd018b6F4A913843D71850d5C", decimals: 18, chain: "polygon", logo: "🔷" },
   { symbol: "QUICK", name: "QuickSwap", address: "0xB38C5c62E9405f8368e82F22816745A735F2FaaB", decimals: 18, chain: "polygon", logo: "⚡" },
+  { symbol: "ZIM", name: "Zim Token", address: "0xD04E8A71d0eEAF1b97B6c27bF6797477dDc20DFB", decimals: 18, chain: "polygon", logo: "🔷" },
 
   // Arbitrum tokens
   { symbol: "ETH", name: "Ethereum", address: "0x0000000000000000000000000000000000000000", decimals: 18, chain: "arbitrum", logo: "🔷" },
