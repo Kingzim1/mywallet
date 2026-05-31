@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { decryptWallet, WalletInfo, TOKENS, ImportedToken } from "@/lib/wallet";
+import { 
+  decryptWallet, 
+  WalletInfo, 
+  TOKENS, 
+  ImportedToken,
+  TokenBalance,
+  getTokenBalance,
+  getAllTokenBalances,
+  connectMetaMask
+} from "@/lib/wallet";
 import { getTokenPrices, TokenPrice } from "@/lib/price";
 
 export default function WalletPage() {
@@ -23,6 +32,10 @@ export default function WalletPage() {
     }
     return [];
   });
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
+  const [metamaskAddress, setMetamaskAddress] = useState<string | null>(null);
+  const [isConnectingMetamask, setIsConnectingMetamask] = useState(false);
 
   const allTokens = [...TOKENS, ...importedTokens];
 
@@ -30,6 +43,20 @@ export default function WalletPage() {
     const tokenSymbols = allTokens.map(t => t.symbol);
     const tokenPrices = await getTokenPrices(tokenSymbols);
     setPrices(tokenPrices);
+  };
+
+  const loadBalances = async () => {
+    if (!wallet) return;
+    
+    setIsLoadingBalances(true);
+    try {
+      const balances = await getAllTokenBalances(wallet.address, allTokens, wallet.chain);
+      setTokenBalances(balances);
+    } catch (error) {
+      console.error("Failed to load token balances:", error);
+    } finally {
+      setIsLoadingBalances(false);
+    }
   };
 
   const handleUnlock = () => {
@@ -40,29 +67,89 @@ export default function WalletPage() {
         setWallet(decrypted);
         setIsUnlocked(true);
         loadPrices();
+        loadBalances();
       }
     }
   };
+
+  const handleConnectMetamask = async () => {
+    setIsConnectingMetamask(true);
+    try {
+      const address = await connectMetaMask();
+      setMetamaskAddress(address);
+      // Optionally, you could set this as the active wallet
+      // For now, we'll just store the address
+    } catch (error) {
+      console.error("Failed to connect MetaMask:", error);
+      alert("Failed to connect MetaMask: " + (error as Error).message);
+    } finally {
+      setIsConnectingMetamask(false);
+    }
+  };
+
+  useEffect(() => {
+    const stored = localStorage.getItem("importedTokens");
+    if (stored) {
+      setImportedTokens(JSON.parse(stored));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (wallet) {
+      loadPrices();
+      loadBalances();
+    }
+  }, [wallet]);
 
   if (!wallet || !isUnlocked) {
     return (
       <div className="min-h-screen bg-neutral-900 text-white p-4 flex items-center justify-center">
         <div className="max-w-md w-full">
           <h1 className="text-2xl font-bold mb-6 text-center">Unlock Wallet</h1>
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-neutral-800 rounded-lg mb-4"
-            onKeyPress={(e) => e.key === "Enter" && handleUnlock()}
-          />
-          <button
-            onClick={handleUnlock}
-            className="w-full p-3 bg-blue-600 rounded-lg font-semibold"
-          >
-            Unlock
-          </button>
+          
+          <div className="space-y-4">
+            <button
+              onClick={handleConnectMetamask}
+              disabled={isConnectingMetamask}
+              className="w-full p-3 bg-blue-600 rounded-lg font-semibold flex items-center justify-center"
+            >
+              {isConnectingMetamask ? (
+                <>
+                  <span className="mr-2">Connecting...</span>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                </>
+              ) : (
+                <>
+                  <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></span>
+                  Connect MetaMask
+                </>
+              )}
+            </button>
+            
+            {metamaskAddress && (
+              <div className="bg-neutral-800 p-3 rounded-lg">
+                <p className="text-xs text-neutral-400">Connected Address</p>
+                <p className="font-mono text-sm break-all">{metamaskAddress}</p>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <input
+                type="password"
+                placeholder="Enter Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 bg-neutral-800 rounded-lg mb-2"
+                onKeyPress={(e) => e.key === "Enter" && handleUnlock()}
+              />
+              <button
+                onClick={handleUnlock}
+                className="w-full p-3 bg-blue-600 rounded-lg font-semibold"
+              >
+                Unlock with Seed Phrase/Private Key
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -120,6 +207,10 @@ export default function WalletPage() {
           <div className="space-y-3">
             {allTokens.map((token) => {
               const price = prices[token.symbol];
+              const balanceInfo = tokenBalances.find(b => b.symbol === token.symbol);
+              const balance = balanceInfo ? parseFloat(balanceInfo.balance) : 0;
+              const tokenValue = balance * (price?.price || 0);
+              
               return (
                 <div key={token.symbol + (token.address || "")} className="flex justify-between items-center bg-neutral-800 p-3 rounded-lg">
                   <div className="flex items-center">
@@ -132,12 +223,18 @@ export default function WalletPage() {
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">${price ? price.price.toFixed(2) : "0.00"}</p>
+                  <div className="text-right space-y-1">
+                    <p className="font-semibold">{balance.toFixed(6)} {token.symbol}</p>
                     {price && (
-                      <p className={`text-xs ${price.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
-                        {price.change24h >= 0 ? "+" : ""}{price.change24h.toFixed(2)}%
-                      </p>
+                      <>
+                        <p className="text-xs text-neutral-400">${tokenValue.toFixed(2)}</p>
+                        <p className="font-semibold">${price ? price.price.toFixed(2) : "0.00"}</p>
+                        {price && (
+                          <p className={`text-xs ${price.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
+                            {price.change24h >= 0 ? "+" : ""}{price.change24h.toFixed(2)}%
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

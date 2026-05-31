@@ -10,6 +10,12 @@ export interface WalletInfo {
   chain: string;
 }
 
+export interface TokenBalance {
+  symbol: string;
+  balance: string; // Using string to handle large numbers and decimals
+  token: TokenInfo | ImportedToken;
+}
+
 export interface TokenInfo {
   symbol: string;
   name: string;
@@ -125,6 +131,51 @@ export function importWalletFromSeedPhrase(seedPhrase: string, chain: string = "
     throw new Error("Invalid seed phrase");
   }
   return generateWallet(seedPhrase, chain);
+}
+
+export function getTokenBalance(walletAddress: string, token: TokenInfo | ImportedToken, chain: string): Promise<string> {
+  // For native tokens (ETH, BNB, MATIC, etc.), we get the native balance
+  // For contract tokens, we would need to call the balanceOf method
+  
+  // This is a simplified version - in a real app, you'd use ethers.js to call balanceOf
+  // For now, we'll return a placeholder
+  return Promise.resolve("0");
+}
+
+export async function getAllTokenBalances(walletAddress: string, tokens: (TokenInfo | ImportedToken)[], chain: string): Promise<TokenBalance[]> {
+  const balances = await Promise.all(
+    tokens.map(async (token) => {
+      const balance = await getTokenBalance(walletAddress, token, chain);
+      return {
+        symbol: token.symbol,
+        balance,
+        token
+      };
+    })
+  );
+  return balances;
+}
+
+// MetaMask connection functions
+export function connectMetaMask(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      provider.send("eth_requestAccounts", []).then((accounts: string[]) => {
+        resolve(accounts[0]);
+      }).catch(reject);
+    } else {
+      reject(new Error("MetaMask not detected"));
+    }
+  });
+}
+
+export function getProvider(chainId: string): ethers.JsonRpcProvider {
+  const chainInfo = SUPPORTED_CHAINS.find(c => c.id === chainId);
+  if (!chainInfo) {
+    throw new Error(`Unsupported chain: ${chainId}`);
+  }
+  return new ethers.JsonRpcProvider(chainInfo.rpc);
 }
 
 export function importToken(
